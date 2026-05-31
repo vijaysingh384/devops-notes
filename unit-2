@@ -1,0 +1,172 @@
+Containers are a form of operating-system-level virtualization. They package an application and its dependencies into a self-contained unit, isolating it from other processes on the same host
+. This allows multiple containers to run side-by-side on one OS, making applications portable and resource-efficient.
+Docker is a popular container platform. It uses the host’s kernel features (namespaces and cgroups) to isolate containers
+. Docker provides a client-server architecture: the Docker Engine (daemon) manages containers and images, and the Docker CLI (client) sends commands to it.
+Containers vs. Virtual Machines: Unlike VMs, containers share the host OS kernel rather than running full guest OS instances
+. This makes containers more lightweight and faster to start, but they all rely on the same kernel. In contrast, VMs each include their own OS and virtualized hardware. A simple diagram (below) compares these architectures.
+Core components: Key Docker concepts include images (read-only templates), containers (running instances of images), Dockerfile (instructions to build images), and registries (repositories like Docker Hub to store images).
+Basic Docker commands: Common commands include docker pull (download an image), docker run (create and start a container from an image)
+, docker ps (list containers), docker stop/docker rm (stop/remove containers), and docker images (list images). For example, docker run -it ubuntu bash launches an interactive Ubuntu shell. Running docker info shows system summary (number of containers and images)
+.
+Outline
+Containers and Virtualization: Overview of container technology, its purpose, and how it differs from VMs.
+Container Isolation Mechanisms: Concepts like Linux namespaces and cgroups that make containers work
+.
+Docker Platform Overview: Components of Docker (Engine/daemon, client, Dockerfile, images, containers, registries).
+Basic Docker Workflow and Commands: Key commands for working with containers (pull, run, ps, stop, etc.) and how Docker uses images.
+Examples and Use Cases: Illustrative commands and outputs (e.g. docker info, docker run) and practical scenarios.
+Key Takeaways and Review: Summarize main points, definitions, and questions for study.
+Section-by-Section Summaries
+Containers and Virtualization:
+
+A container packages an application and all its dependencies (libraries, binaries, config) into a single unit
+. It runs on top of the host OS but is isolated: it sees its own view of the file system, processes, network, etc. Containers use host kernel features (namespaces for resource/view isolation and cgroups for resource limits) to keep processes separate
+.
+Think of a container as a “portable cake recipe”: the image (recipe) contains everything needed, and each running container (cake) is created from that image
+.
+Why use containers? They ensure consistency across environments (dev/test/prod), speed up deployment (no booting a full OS), and improve resource utilization. Containers start quickly because they don’t need a full guest OS, and one host can run many containers with minimal overhead.
+Container vs. Virtual Machine:
+
+Key difference: Containers share the host OS kernel, whereas VMs include their own OS kernel on virtualized hardware
+.
+In a VM setup, each VM has a hypervisor and a guest OS. In a container setup, the host kernel is shared and a container engine (like Docker Engine) manages containers directly.
+Because of this, containers are lighter-weight than VMs. For example, multiple Linux containers can run on a Windows host (with a minimal Linux VM under the hood), or on a single Linux server, without needing separate OS instances
+.
+Mermaid Diagram: The following shows the difference between containers and VMs:
+mermaid
+Copy
+graph LR
+    Hardware --> HostKernel[Host OS Kernel<br/>(namespaces, cgroups)]
+    HostKernel --> DockerEngine[Docker Engine/Daemon]
+    DockerEngine --> ContainerA[Container A<br/>(App + Dependencies)]
+    DockerEngine --> ContainerB[Container B<br/>(App + Dependencies)]
+    Hardware --> Hypervisor[VM Hypervisor]
+    Hypervisor --> VM1[Virtual Machine 1:<br/>Guest OS + App]
+    Hypervisor --> VM2[Virtual Machine 2:<br/>Guest OS + App]
+    classDef host fill:#d0f0c0,stroke:#333;
+    class HostKernel,DockerEngine host;
+    classDef vm fill:#f0d0d0,stroke:#333;
+    class Hypervisor,VM1,VM2 vm;
+Docker Platform Overview:
+
+Docker Engine: The core service (daemon) that manages containers. It listens to the Docker API and handles building, running, and distributing containers. Docker is a client-server application
+.
+Docker Client (CLI): The docker command-line tool. It sends commands to the Docker Engine (via API). Example: docker run, docker pull, etc.
+Images: Read-only templates (like blueprints) used to create containers. An image contains a stack (layers) of file changes; it can be reused across containers. Images often come from Docker Hub or custom registries
+.
+Containers: A running (or stopped) instance of an image, with a writable layer added on top. Containers run the actual applications. Each container has its own isolated environment but shares the host kernel. Changes made in one container’s writable layer do not affect the image or other containers.
+Dockerfile: A text file listing instructions to build a Docker image (install packages, copy files, set commands). Each instruction adds a new layer to the image. (Not explicitly in provided slides, but central to Docker builds.)
+Registries: Services like Docker Hub or private registries store and distribute images. docker pull downloads an image from a registry; docker push uploads an image.
+Basic Docker Commands:
+
+docker pull <image>: Download an image from a registry. If no tag is given, it defaults to :latest.
+bash
+Copy
+$ docker pull ubuntu:24.04  
+(This fetches the Ubuntu 24.04 image from Docker Hub
+.)
+docker run [OPTIONS] <image> [command]: Create and start a new container from an image
+. Common options: -d (detach), -it (interactive terminal), --name <name>. Example:
+bash
+Copy
+$ docker run -it ubuntu:24.04 bash  
+This creates a container from Ubuntu 24.04 and runs a Bash shell interactively.
+docker ps: List running containers. By default, it shows only running containers. Add -a or --all to see all containers (running or stopped)
+.
+docker stop <container> and docker rm <container>: Stop and remove containers, respectively.
+docker images: List downloaded images on the host.
+docker info: Show system-wide information. Example output (showing counts of containers/images)
+:
+yaml
+Copy
+Server:
+ Containers: 14
+  Running: 3
+  Paused: 1
+  Stopped: 10
+ Images: 52
+ ...  
+This tells you how many containers are created (and their states) and how many images are present
+.
+Examples and Use Cases:
+
+A development workflow might pull a base image, build a custom image (via Dockerfile), then run a container from it.
+Continuous Integration/Delivery: Teams use containers to replicate environments (dev/test/prod) exactly, reducing “it works on my machine” issues
+.
+Legacy App Modernization: Old applications can be containerized by packaging their dependencies, allowing them to run unchanged in new environments
+.
+Command Examples: As above, running docker info, docker run, and docker pull. For instance, pulling Debian and then checking local images:
+bash
+Copy
+$ docker pull debian
+$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+debian       latest    e756f3fdd6a3   3 weeks ago    124MB
+(This shows that debian:latest was pulled and its image ID and size
+.)
+Key Takeaways
+Containers package applications with their environment. A container includes the app code, runtime, libraries, and settings needed to run
+.
+Docker is a container engine. It provides tools and services (daemon, CLI, registries) to build, run, and share containers
+.
+Lightweight and portable. Containers are generally faster to start and use fewer resources than VMs because they leverage the host OS
+.
+Isolation via kernel features. Containers use Linux namespaces (for isolating process ID, network, mounts, etc.) and control groups (cgroups, for resource limits)
+.
+Important Docker commands:
+docker pull to fetch images.
+docker run to create containers from images.
+docker ps (with -a) to list containers.
+docker stop/docker rm to stop and remove containers.
+docker info to see system summary (containers/images counts)
+.
+Images vs. containers: An image is a static template (often layered) for creating containers; a container is a running (or stopped) instance of that image. Multiple containers can be created from a single image.
+Key Definitions and Formulas
+Container: “A standard unit of software that packages up code and all its dependencies so the application runs quickly and reliably from one computing environment to another”
+. Each container shares the host OS kernel but has its own isolated user space.
+Image: A read-only template (built from a Dockerfile) containing application code and dependencies. Images are composed of layers and identified by hashes. For example, ubuntu:24.04 is a common image for Ubuntu Linux.
+Virtual Machine (VM): A full emulation of hardware running a guest OS on top of a hypervisor. VMs include their own kernel and require more resources. Unlike containers, VMs do not share the host OS kernel
+.
+Namespaces (Linux): Kernel feature that partitions system resources (process IDs, network, filesystem mounts, etc.) so each container has an independent view. Namespaces form the basis of container isolation
+.
+Control Groups (cgroups): Kernel feature to limit and account for resources (CPU, memory, I/O) used by a set of processes (e.g. a container). Docker uses cgroups to enforce resource limits on containers
+.
+Docker Daemon (Engine): The background service that manages images, containers, networks, and volumes. The daemon listens for Docker API requests and executes them.
+Docker CLI (Client): The docker command-line tool used by developers/operators to interact with the Docker daemon.
+Examples (Code Snippets)
+Running a container:
+bash
+Copy
+$ docker run -it --name mycontainer ubuntu:20.04 bash
+Starts a new Ubuntu 20.04 container named “mycontainer” and opens an interactive Bash shell.
+Listing containers:
+bash
+Copy
+$ docker ps        # shows running containers
+$ docker ps -a     # shows all containers (running and stopped)[object Object]  
+Viewing system info:
+bash
+Copy
+$ docker info
+Output (excerpt) shows number of containers/images, etc.:
+yaml
+Copy
+Server:
+  Containers:  5
+    Running: 2
+    Paused: 0
+    Stopped: 3
+  Images: 10
+(This format is from Docker’s documentation
+.)
+Pulling an image:
+bash
+Copy
+$ docker pull nginx:latest
+Downloads the latest nginx image from Docker Hub. For example, pulling Debian:
+makefile
+Copy
+$ docker pull debian:latest
+latest: Pulling from library/debian
+Digest: sha256:...
+Status: Downloaded newer image for debian:latest
